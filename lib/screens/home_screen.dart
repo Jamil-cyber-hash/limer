@@ -1,7 +1,6 @@
 import 'cart_screenV2.dart';
 import 'package:flutter/material.dart';
 import 'product_list_screen.dart';
-import 'cart_screen.dart';
 import 'sales_history_screen.dart';
 import 'product_management_screen.dart';
 

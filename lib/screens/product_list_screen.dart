@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/product.dart';
 
 class ProductListScreen extends StatefulWidget {
+  const ProductListScreen({super.key});
+
   @override
   _ProductListScreenState createState() => _ProductListScreenState();
 }
@@ -10,7 +12,7 @@ class ProductListScreen extends StatefulWidget {
 class _ProductListScreenState extends State<ProductListScreen> {
   late Box<Product> productBox;
   late Box<Product> cartBox;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
   List<Product> _filteredProducts = [];
   Map<int, int> productQuantities = {}; // Track selected quantities
 

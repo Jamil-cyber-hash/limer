@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/product.dart';
+import '../models/sale.dart';
 
 class CartScreenV2 extends StatefulWidget {
+  const CartScreenV2({super.key});
+
   @override
   _CartScreenV2State createState() => _CartScreenV2State();
 }
@@ -30,30 +33,48 @@ class _CartScreenV2State extends State<CartScreenV2> {
   }
 
   void _processCheckout() {
-    double total = _calculateTotal();
-    double change = _amountPaid - total;
+  double total = _calculateTotal();
+  double change = _amountPaid - total;
 
-    if (_amountPaid >= total) {
-      cartBox.clear();
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Transaction Successful'),
-          content: Text('Change: \$${change.toStringAsFixed(2)}'),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
-        ),
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Insufficient Payment'),
-          content: Text('Enter a sufficient amount.'),
-          actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
-        ),
-      );
-    }
+  if (_amountPaid >= total) {
+    _saveSale(total); // ✅ Save the sale record before clearing cart
+    cartBox.clear();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Transaction Successful'),
+        content: Text('Change: \$${change.toStringAsFixed(2)}'),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
+      ),
+    );
+  } else {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Insufficient Payment'),
+        content: Text('Enter a sufficient amount.'),
+        actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text('OK'))],
+      ),
+    );
   }
+}
+
+void _saveSale(double totalAmount) async {
+  var salesBox = await Hive.openBox<Sale>('sales');
+  Sale newSale = Sale(
+    products: cartBox.values.toList(),
+    totalAmount: totalAmount,
+    amountPaid: _amountPaid,
+    change: _amountPaid - totalAmount,
+    date: DateTime.now(),
+    amount: cartBox.length,
+  );
+  
+  await salesBox.add(newSale);
+  print("✅ Sale saved: \$${newSale.amount} on ${newSale.date}");
+}
+
 
   @override
   Widget build(BuildContext context) {

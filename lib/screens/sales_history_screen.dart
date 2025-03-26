@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import '../models/sale.dart';
 
 class SalesHistoryScreen extends StatelessWidget {
+  const SalesHistoryScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final salesBox = Hive.box<Sale>('sales');
@@ -24,7 +26,7 @@ class SalesHistoryScreen extends StatelessWidget {
 
               return Card(
                 child: ListTile(
-                  title: Text('Sale on ${sale.dateTime.toString()}'),
+                  title: Text('Sale on ${sale.date.toString()}'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

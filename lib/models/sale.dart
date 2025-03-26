@@ -18,13 +18,19 @@ class Sale extends HiveObject {
   double change;
 
   @HiveField(4)
-  DateTime dateTime;
+  DateTime date;
+
+  @HiveField(5)
+  int amount;
 
   Sale({
     required this.products,
     required this.totalAmount,
     required this.amountPaid,
     required this.change,
-    required this.dateTime,
+    required this.date,
+    required this.amount
   });
+
+
 }
