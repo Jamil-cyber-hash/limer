@@ -27,10 +27,11 @@ class _CartScreenV2State extends State<CartScreenV2> {
   }
 
   double _calculateTotal() {
-    return cartBox.values.fold(0, (sum, product) {
-      return sum + product.price;
-    });
-  }
+  return cartBox.values.fold(0, (sum, product) {
+    return sum + (product.price * product.quantity); // ✅ Multiply by quantity
+  });
+}
+
 
   void _processCheckout() {
   double total = _calculateTotal();
@@ -95,14 +96,18 @@ void _saveSale(double totalAmount) async {
                     final product = box.get(key);
                     if (product == null) return SizedBox.shrink();
 
-                    return ListTile(
-                      title: Text(product.name),
-                      subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                      trailing: IconButton(
-                        icon: Icon(Icons.remove_circle, color: Colors.red),
-                        onPressed: () => _removeFromCart(key),
-                      ),
-                    );
+                  return ListTile(
+                  title: Text(product.name),
+                  subtitle: Text(
+                    '\$${product.price.toStringAsFixed(2)} x ${product.quantity} = \$${(product.price * product.quantity).toStringAsFixed(2)}'
+                  ),
+                  trailing: IconButton(
+                    icon: Icon(Icons.remove_circle, color: Colors.red),
+                    onPressed: () => _removeFromCart(key),
+                  ),
+                );
+
+
                   },
                 );
               },

@@ -13,6 +13,13 @@ class Product extends HiveObject {
   @HiveField(2)
   int stock;
 
+  @HiveField(3) 
+  int quantity; // ✅ New field for quantity
 
-  Product({required this.name, required this.price, required this.stock });
+  Product({
+    required this.name,
+    required this.price,
+    required this.stock,
+    this.quantity = 1, // Default to 1 when added to cart
+  });
 }

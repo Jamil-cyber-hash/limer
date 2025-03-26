@@ -32,21 +32,42 @@ class _ProductListScreenState extends State<ProductListScreen> {
     });
   }
 
-  void _addToCart(Product product, int quantity) {
-    if (product.stock >= quantity) {
-      setState(() {
-        product.stock -= quantity;
-        productBox.put(product.key, product);
-        for (int i = 0; i < quantity; i++) {
-          cartBox.add(Product(
-            name: product.name,
-            price: product.price,
-            stock: 1, // Store individually in cart
-          ));
-        }
-      });
-    }
+  void _addToCart(Product product, int selectedQuantity) {
+  final existingProductKey = cartBox.keys.firstWhere(
+    (key) {
+      final item = cartBox.get(key);
+      return item != null && item.name == product.name;
+    },
+    orElse: () => null,
+  );
+
+  if (existingProductKey != null) {
+    // ✅ Clone the product with updated quantity
+    final existingProduct = cartBox.get(existingProductKey);
+    final updatedProduct = Product(
+      name: existingProduct!.name,
+      price: existingProduct.price,
+      stock: existingProduct.stock,
+      quantity: selectedQuantity, // ✅ Use selected quantity
+    );
+
+    cartBox.put(existingProductKey, updatedProduct); // ✅ Store cloned object
+  } else {
+    // 🆕 Add new product if not in cart
+    final newProduct = Product(
+      name: product.name,
+      price: product.price,
+      stock: product.stock,
+      quantity: selectedQuantity, // ✅ Use selected quantity
+    );
+    cartBox.add(newProduct);
   }
+
+  setState(() {});
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
