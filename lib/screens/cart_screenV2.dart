@@ -11,26 +11,36 @@ class CartScreenV2 extends StatefulWidget {
 
 class _CartScreenV2State extends State<CartScreenV2> {
   late Box<Product> cartBox;
+  late Box<Product> productBox;
   double _amountPaid = 0.0;
 
   @override
   void initState() {
     super.initState();
     cartBox = Hive.box<Product>('cart');
+    productBox = Hive.box<Product>('products');
   }
 
   void _updateQuantity(Product product, int newQuantity) {
     if (newQuantity > 0) {
-      product.stock = newQuantity;
+      product.quantity = newQuantity;
       product.save();
     } else {
-      cartBox.delete(product.key);
+      _deleteProduct(product);
     }
     setState(() {});
   }
 
+  void _deleteProduct(Product product) {
+    final originalProduct = productBox.values.firstWhere((p) => p.name == product.name);
+    originalProduct.stock += product.quantity;
+    originalProduct.save();
+    cartBox.delete(product.key);
+    setState(() {});
+  }
+
   double _calculateTotal() {
-    return cartBox.values.fold(0, (sum, item) => sum + (item.price * item.stock));
+    return cartBox.values.fold(0, (sum, item) => sum + (item.price * item.quantity));
   }
 
   void _processCheckout() {
@@ -83,17 +93,33 @@ class _CartScreenV2State extends State<CartScreenV2> {
                       margin: EdgeInsets.all(8),
                       child: ListTile(
                         title: Text(product!.name, style: TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('Quantity: ${product.stock} | Price: \$${product.price}'),
+                        subtitle: Text('Quantity: ${product.quantity} | Price: \$${product.price}'),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
                               icon: Icon(Icons.remove_circle, color: Colors.red),
-                              onPressed: () => _updateQuantity(product, product.stock - 1),
+                              onPressed: () {
+                                if (product.quantity > 1) {
+                                  _updateQuantity(product, product.quantity - 1);
+                                  final originalProduct = productBox.values.firstWhere((p) => p.name == product.name);
+                                  originalProduct.stock += 1;
+                                  originalProduct.save();
+                                }
+                              },
                             ),
                             IconButton(
                               icon: Icon(Icons.add_circle, color: Colors.green),
-                              onPressed: () => _updateQuantity(product, product.stock + 1),
+                              onPressed: () {
+                                _updateQuantity(product, product.quantity + 1);
+                                final originalProduct = productBox.values.firstWhere((p) => p.name == product.name);
+                                originalProduct.stock -= 1;
+                                originalProduct.save();
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.grey),
+                              onPressed: () => _deleteProduct(product),
                             ),
                           ],
                         ),
