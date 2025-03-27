@@ -72,69 +72,109 @@ class _ProductListScreenState extends State<ProductListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Products')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
+      appBar: AppBar(
+        title: const Text('Products'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
               controller: _searchController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Search Products',
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: _filterProducts,
             ),
-          ),
-          Expanded(
-            child: ValueListenableBuilder(
-              valueListenable: productBox.listenable(),
-              builder: (context, Box<Product> box, _) {
-                if (box.isEmpty) return Center(child: Text('No products available'));
-                return ListView.builder(
-                  itemCount: _filteredProducts.length,
-                  itemBuilder: (context, index) {
-                    final product = _filteredProducts[index];
-                    int quantity = productQuantities[product.key] ?? 1; // Default to 1
-                    
-                    return ListTile(
-                      title: Text(product.name),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('\$${product.price} - Stock: ${product.stock}'),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Slider(
-                                  value: quantity.toDouble(),
-                                  min: 1,
-                                  max: product.stock.toDouble(),
-                                  divisions: product.stock > 0 ? product.stock : 1,
-                                  label: quantity.toString(),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      productQuantities[product.key] = value.toInt();
-                                    });
-                                  },
-                                ),
-                              ),
-                              ElevatedButton(
-                                onPressed: () => _addToCart(product, quantity),
-                                child: Text('Add to Cart'),
-                              )
-                            ],
-                          )
-                        ],
+            const SizedBox(height: 16),
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: productBox.listenable(),
+                builder: (context, Box<Product> box, _) {
+                  if (box.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No products available',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
                     );
-                  },
-                );
-              },
+                  }
+                  return ListView.builder(
+                    itemCount: _filteredProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = _filteredProducts[index];
+                      int quantity = productQuantities[product.key] ?? 1;
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 8.0),
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '\$${product.price.toStringAsFixed(2)} - Stock: ${product.stock}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Slider(
+                                      value: quantity.toDouble(),
+                                      min: 1,
+                                      max: product.stock.toDouble(),
+                                      divisions: product.stock > 0 ? product.stock : 1,
+                                      label: quantity.toString(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          productQuantities[product.key] = value.toInt();
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                  ElevatedButton.icon(
+                                    onPressed: () => _addToCart(product, quantity),
+                                    icon: const Icon(Icons.add_shopping_cart),
+                                    label: const Text('Add'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
